@@ -20,15 +20,11 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 
-#include "DeviceWithDisplay.h"
-
 #include <app-common/zap-generated/attributes/Accessors.h>
 
 #define APP_TASK_NAME "APP"
 #define APP_EVENT_QUEUE_SIZE 10
 #define APP_TASK_STACK_SIZE (3072)
-#define BUTTON_PRESSED 1
-#define APP_LIGHT_SWITCH 1
 
 using namespace ::chip;
 using namespace ::chip::app;
