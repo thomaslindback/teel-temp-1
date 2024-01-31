@@ -115,15 +115,15 @@ extern "C" void app_main()
         return;
     }
 
-#if CONFIG_ENABLE_ESP32_FACTORY_DATA_PROVIDER
-    SetCommissionableDataProvider(&sFactoryDataProvider);
-    SetDeviceAttestationCredentialsProvider(&sFactoryDataProvider);
-#if CONFIG_ENABLE_ESP32_DEVICE_INSTANCE_INFO_PROVIDER
-    SetDeviceInstanceInfoProvider(&sFactoryDataProvider);
-#endif
-#else
+//#if CONFIG_ENABLE_ESP32_FACTORY_DATA_PROVIDER
+//    SetCommissionableDataProvider(&sFactoryDataProvider);
+//    SetDeviceAttestationCredentialsProvider(&sFactoryDataProvider);
+//#if CONFIG_ENABLE_ESP32_DEVICE_INSTANCE_INFO_PROVIDER
+//    SetDeviceInstanceInfoProvider(&sFactoryDataProvider);
+//#endif
+//#else
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
-#endif // CONFIG_ENABLE_ESP32_FACTORY_DATA_PROVIDER
+//#endif // CONFIG_ENABLE_ESP32_FACTORY_DATA_PROVIDER
 
     chip::DeviceLayer::PlatformMgr().ScheduleWork(InitServer, reinterpret_cast<intptr_t>(nullptr));
 }

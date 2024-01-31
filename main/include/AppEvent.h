@@ -39,7 +39,7 @@ struct AppEvent
         } TemperatureEvent;
         struct
         {
-            float Humidity
+            float Humidity;
         } HumidityEvent;
     };
 

@@ -34,7 +34,7 @@ using namespace ::chip::DeviceLayer;
 static const char * TAG = "app-task";
 
 namespace {
-constexpr EndpointId kLightEndpointId = 1;
+constexpr EndpointId kTempEndpointId = 1;
 QueueHandle_t sAppEventQueue;
 TaskHandle_t sAppTaskHandle;
 TimerHandle_t sTimerHandle;
@@ -67,13 +67,10 @@ void AppTask::TimerTimeoutHandler(TimerHandle_t xTimer) {
 CHIP_ERROR AppTask::Init()
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
-
-    chip::PlatformMgr().LockChipStack();
-    app::Clusters::TemperatureMeasurement::Attributes::MinMeasuredValue::Set(kExampleEndpointId, 0);
-    app::Clusters::TemperatureMeasurement::Attributes::MaxMeasuredValue::Set(kExampleEndpointId, 50);
-    chip::PlatformMgr().UnlockChipStack();
-
-
+    chip::DeviceLayer::PlatformMgr().LockChipStack();
+    app::Clusters::TemperatureMeasurement::Attributes::MinMeasuredValue::Set(kTempEndpointId, 0);
+    app::Clusters::TemperatureMeasurement::Attributes::MaxMeasuredValue::Set(kTempEndpointId, 50);
+    chip::DeviceLayer::PlatformMgr().UnlockChipStack();
     return err;
 }
 
@@ -141,7 +138,7 @@ void AppTask::TemperatureActionEventHandler(AppEvent * aEvent)
     //sAppTask.UpdateClusterState();
     //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
     chip::DeviceLayer::PlatformMgr().LockChipStack();
-    app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(kExampleEndpointId, 1200);
+    app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(kTempEndpointId, 1200);
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
 
 }
@@ -150,7 +147,7 @@ void AppTask::UpdateClusterState()
 {
     ESP_LOGI(TAG, "Writing to OnOff cluster");
     // write the new on/off value
-    EmberAfStatus status = Clusters::OnOff::Attributes::OnOff::Set(kLightEndpointId, AppLED.IsTurnedOn());
+    EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS; //Clusters::OnOff::Attributes::OnOff::Set(kLightEndpointId, AppLED.IsTurnedOn());
 
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
@@ -158,7 +155,7 @@ void AppTask::UpdateClusterState()
     }
 
     ESP_LOGI(TAG, "Writing to Current Level cluster");
-    status = Clusters::LevelControl::Attributes::CurrentLevel::Set(kLightEndpointId, AppLED.GetLevel());
+    status = EMBER_ZCL_STATUS_SUCCESS; //Clusters::LevelControl::Attributes::CurrentLevel::Set(kLightEndpointId, AppLED.GetLevel());
 
     if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
