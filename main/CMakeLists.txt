@@ -54,7 +54,7 @@ set(SRC_DIRS_LIST
                       "${CMAKE_SOURCE_DIR}/third_party/connectedhomeip/examples/providers"
 )
 
-set(PRIV_REQUIRES_LIST chip QRCode bt nvs_flash)
+set(PRIV_REQUIRES_LIST chip QRCode bt nvs_flash driver)
 
 if (CONFIG_ENABLE_PW_RPC)
 # Append additional directories for RPC build
