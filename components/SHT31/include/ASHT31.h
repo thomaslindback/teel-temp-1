@@ -51,29 +51,29 @@
 
 namespace sht31 {
 
-  class ASHT31 {
-    public:
-    ASHT31();
-    ~ASHT31();
+class ASHT31 {
+public:
+  ASHT31();
+  ~ASHT31();
 
-    bool begin(uint8_t i2caddr = SHT31_DEFAULT_ADDR, i2c_port_t master_port_num = I2C_NUM_0);
-    float readTemperature(void);
-    float readHumidity(void);
-    bool readBoth(float* temperature_out, float* humidity_out);
-    uint16_t readStatus(void);
-    void reset(void);
-    void heater(bool h);
-    bool isHeaterEnabled();
+  bool begin(uint8_t i2caddr = SHT31_DEFAULT_ADDR, i2c_port_t master_port_num = I2C_NUM_0);
+  float readTemperature(void);
+  float readHumidity(void);
+  bool readBoth(float *temperature_out, float *humidity_out);
+  uint16_t readStatus(void);
+  void reset(void);
+  void heater(bool h);
+  bool isHeaterEnabled();
 
-    private:
-    float humidity;
-    float temp;
-    bool readTempHum(void);
-    esp_err_t writeCommand(uint16_t cmd);
+private:
+  float humidity;
+  float temp;
+  bool readTempHum(void);
+  esp_err_t writeCommand(uint16_t cmd);
 
-    i2c_port_t _master_port_num;
-    uint8_t _i2caddr;
-    esp_err_t register_read(uint16_t reg_addr, uint8_t* data, size_t len);
-  };
+  i2c_port_t _master_port_num;
+  uint8_t _i2caddr;
+  esp_err_t register_read(uint16_t reg_addr, uint8_t *data, size_t len);
+};
 
 }

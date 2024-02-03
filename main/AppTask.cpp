@@ -20,6 +20,7 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
+#include "ASHT31.h"
 
 #include <app-common/zap-generated/attributes/Accessors.h>
 
@@ -42,8 +43,13 @@ namespace {
 } // namespace
 
 AppTask AppTask::sAppTask;
+sht31::ASHT31 temperature;
 
 CHIP_ERROR AppTask::StartAppTask() {
+    if(!temperature.begin()) {
+        ESP_LOGI(TAG, "Failed to begin sht31");
+    }
+
     sAppEventQueue = xQueueCreate(APP_EVENT_QUEUE_SIZE, sizeof(AppEvent));
     if (sAppEventQueue == NULL) {
         ESP_LOGE(TAG, "Failed to allocate app event queue");
@@ -72,10 +78,12 @@ CHIP_ERROR AppTask::StartAppTask() {
 
 void AppTask::TimerTimeoutHandler(TimerHandle_t xTimer) {
     ESP_LOGI(TAG, "Timer timeout");
+    float temp = temperature.readTemperature();
+    ESP_LOGI(TAG, "Temp: %f", temp);
 
     AppEvent timeout_event = {};
     timeout_event.Type = AppEvent::kEventType_Temp;
-    timeout_event.TemperatureEvent.Temp = 1300f;
+    timeout_event.TemperatureEvent.Temp = temp;
     timeout_event.mHandler = TemperatureActionEventHandler;
     sAppTask.PostEvent(&timeout_event);
 }
@@ -137,7 +145,8 @@ void AppTask::TemperatureActionEventHandler(AppEvent* aEvent) {
     //sAppTask.UpdateClusterState();
     //chip::DeviceLayer::PlatformMgr().UnlockChipStack();
     chip::DeviceLayer::PlatformMgr().LockChipStack();
-    EmberAfStatus status = app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(kTempEndpointId, 1200);
+    EmberAfStatus status = app::Clusters::TemperatureMeasurement::Attributes::MeasuredValue::Set(
+        kTempEndpointId, (int16_t)aEvent->TemperatureEvent.Temp * 100);
     if (status != EMBER_ZCL_STATUS_SUCCESS) {
         ESP_LOGE(TAG, "Updating temperature cluster failed: %x", status);
     }
