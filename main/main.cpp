@@ -31,6 +31,7 @@
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 #include <platform/ESP32/ESP32Utils.h>
+#include <common/Esp32ThreadInit.h>
 
 #include <cmath>
 #include <cstdio>
@@ -99,13 +100,13 @@ extern "C" void app_main()
     }
 
     DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
-#if CHIP_DEVICE_CONFIG_ENABLE_WIFI
-    if (DeviceLayer::Internal::ESP32Utils::InitWiFiStack() != CHIP_NO_ERROR)
-    {
-        ESP_LOGE(TAG, "Failed to initialize the Wi-Fi stack");
-        return;
-    }
-#endif
+//#if CHIP_DEVICE_CONFIG_ENABLE_WIFI
+//    if (DeviceLayer::Internal::ESP32Utils::InitWiFiStack() != CHIP_NO_ERROR)
+//    {
+//        ESP_LOGE(TAG, "Failed to initialize the Wi-Fi stack");
+//        return;
+//    }
+//#endif
 
     CHIPDeviceManager & deviceMgr = CHIPDeviceManager::GetInstance();
 
@@ -126,6 +127,7 @@ extern "C" void app_main()
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 //#endif // CONFIG_ENABLE_ESP32_FACTORY_DATA_PROVIDER
 
+    ESPOpenThreadInit();
     chip::DeviceLayer::PlatformMgr().ScheduleWork(InitServer, reinterpret_cast<intptr_t>(nullptr));
 
     error = GetAppTask().StartAppTask();
