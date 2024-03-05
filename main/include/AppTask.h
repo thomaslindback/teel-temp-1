@@ -26,6 +26,11 @@
 #include "freertos/timers.h"
 #include <platform/CHIPDeviceLayer.h>
 
+#include <openthread/error.h>
+#include <openthread/message.h>
+#include <openthread/ip6.h>
+#include <openthread/link.h>
+
 // Application-defined error codes in the CHIP_ERROR space.
 #define APP_ERROR_EVENT_QUEUE_FAILED CHIP_APPLICATION_ERROR(0x01)
 #define APP_ERROR_CREATE_TASK_FAILED CHIP_APPLICATION_ERROR(0x02)
@@ -45,6 +50,7 @@ public:
     static void TimerTimeoutHandler(TimerHandle_t xTimer);
 
     void UpdateClusterState();
+    static void handleNetifStateChanged(otChangedFlags aFlags, void *aContext);
 
 private:
     friend AppTask & GetAppTask(void);

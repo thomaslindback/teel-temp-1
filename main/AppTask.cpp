@@ -23,6 +23,7 @@
 #include "ASHT31.h"
 
 #include <app-common/zap-generated/attributes/Accessors.h>
+#include "esp_openthread.h"
 
 #define APP_TASK_NAME "APP"
 #define APP_EVENT_QUEUE_SIZE 10
@@ -88,12 +89,38 @@ void AppTask::TimerTimeoutHandler(TimerHandle_t xTimer) {
     sAppTask.PostEvent(&timeout_event);
 }
 
+void AppTask::handleNetifStateChanged(otChangedFlags aFlags, void *aContext) {
+    if ((aFlags & OT_CHANGED_THREAD_ROLE) != 0) {
+        otDeviceRole changedRole = otThreadGetDeviceRole(static_cast<otInstance*>(aContext));
+        
+        switch (changedRole) {
+        case OT_DEVICE_ROLE_LEADER:
+            ESP_LOGI(TAG, "--> Leader");
+            break;
+        case OT_DEVICE_ROLE_ROUTER:
+            ESP_LOGI(TAG, "--> Router");
+            break;
+        case OT_DEVICE_ROLE_CHILD:
+            ESP_LOGI(TAG, "--> Child");
+            break;
+        case OT_DEVICE_ROLE_DETACHED:
+        case OT_DEVICE_ROLE_DISABLED:
+            ESP_LOGI(TAG, "--> Detached/Disabled");
+            break;
+        }
+    }
+}
+
 CHIP_ERROR AppTask::Init() {
     CHIP_ERROR err = CHIP_NO_ERROR;
     chip::DeviceLayer::PlatformMgr().LockChipStack();
     app::Clusters::TemperatureMeasurement::Attributes::MinMeasuredValue::Set(kTempEndpointId, 0);
     app::Clusters::TemperatureMeasurement::Attributes::MaxMeasuredValue::Set(kTempEndpointId, 50);
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+
+    otInstance* instance = esp_openthread_get_instance();
+    otSetStateChangedCallback(instance, handleNetifStateChanged, instance);
+
     return err;
 }
 
@@ -151,6 +178,19 @@ void AppTask::TemperatureActionEventHandler(AppEvent* aEvent) {
         ESP_LOGE(TAG, "Updating temperature cluster failed: %x", status);
     }
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+
+    otInstance *instance = esp_openthread_get_instance();
+    otError                  error;
+    otOperationalDatasetTlvs datasetTlvs;
+    error = otDatasetGetActiveTlvs(instance, &datasetTlvs);
+    otOperationalDataset dataset;
+    error = otDatasetParseTlvs(&datasetTlvs, &dataset);
+    ESP_LOGI(TAG, "Network name: %s", dataset.mNetworkName.m8);
+    ESP_LOG_BUFFER_HEX(TAG, dataset.mNetworkKey.m8, 16);
+    ESP_LOGI(TAG, "Channel: %u", dataset.mChannel);
+    if(dataset.mComponents.mIsPskcPresent) {
+        ESP_LOG_BUFFER_HEX(TAG, dataset.mPskc.m8, 16);
+    }
 
 }
 
